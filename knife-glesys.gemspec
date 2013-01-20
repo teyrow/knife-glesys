@@ -8,8 +8,8 @@ Gem::Specification.new do |gem|
   gem.version       = Knife::Glesys::VERSION
   gem.authors       = ["Simon Gate"]
   gem.email         = ["simon@smgt.me"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.description   = %q{Glesys support for Chef's Knife Command}
+  gem.summary       = gem.description
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($/)
