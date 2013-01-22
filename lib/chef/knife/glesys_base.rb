@@ -28,7 +28,6 @@ class Chef
       end
 
       def connection
-        Fog.mock!
         @connection ||= begin
           connection = Fog::Compute.new(
             :provider        => 'Glesys',
