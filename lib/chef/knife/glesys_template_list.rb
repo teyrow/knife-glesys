@@ -7,6 +7,12 @@ class Chef
 
       banner "knife glesys template list (options)"
 
+      deps do
+        require 'fog'
+        require 'readline'
+        Chef::Knife::Bootstrap.load_deps
+      end
+
       def run
 
         template_list = [
