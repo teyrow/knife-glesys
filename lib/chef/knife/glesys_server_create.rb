@@ -46,11 +46,12 @@ class Chef
         :description => "The amount of memory (128mb - 16384mb)",
         :proc => Proc.new { |f| Chef::Config[:knife][:memory] = f }
 
-      option :memory,
-        :short => "-m MEMORY",
-        :long => "--memory MEMORY",
-        :description => "The amount of memory (128mb - 16384mb)",
+      option :transfer,
+        :short => "-i TRANSFER",
+        :long => "--transfer TRANSFER",
+        :description => "Transfer (50gb - 10000gb)",
         :proc => Proc.new { |f| Chef::Config[:knife][:memory] = f }
+
     end
   end
 end
