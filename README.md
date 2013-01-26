@@ -18,14 +18,15 @@ Add this line to your application's Gemfile:
 `-p, --platform PLATFORM`        -  OpenVZ or Xen
 `-d, --datacenter DATACENTER`    -  Location, (Falkenberg, New York, Amsterdam or Stockholm)
 `-c, --cpucores CPUCORES`        -  Number of cpu cores (1-8)
-`-m, --memory MEMORY`            -  The amount of memory (128mb-16384mb)
-`-t, --transfer TRANSFER`        -  The amount of monthly transfer (50gb-10000gb)
+`-m, --memory-size MEMORY`       -  The amount of memory (128mb-16384mb)
+`-d, --disk-size DISK`           -  The amount of disk (5gb-100gb)
+`-T, --transfer TRANSFER`        -  The amount of monthly transfer (50gb-10000gb)
 `-N, --node-name NAME`           -  Chef node name
 `-r, --run-list RUN_LIST`        -  Comma sperated list of roles/recipes tp apply
 `-j, --json-attributes JSON`     -  A JSON string to be added to the first run of chef-client
 `-R, --root-password PASSWORD`   -  Password to set on the root user
 `-h, --hostname HOSTNAME`        -  Hostname to assign the server
-`-d, --description DESCRIPTION`  -  Description of the server
+`-D, --description DESCRIPTION`  -  Description of the server
 `-i, --ipv4 IPV4`                -  IPv4 address to assign
 `-I, --ipv6 IPV6`                -  IPv6 address to assign
 
