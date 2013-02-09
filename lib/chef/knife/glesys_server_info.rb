@@ -17,12 +17,7 @@ class Chef
       def run
         server = connection.servers.get(@name_args.first)
         msg_pair("Server ID", server.serverid)
-        state = case server.state.to_s.downcase
-          when 'shutting-down','terminated','stopping','stopped' then ui.color(server.state, :red)
-          when 'pending' then ui.color(server.state, :yellow)
-          else ui.color(server.state, :green)
-        end
-        msg_pair("State", ui.color(state,:bold))
+        msg_pair("State", ui.color(color_state(state),:bold))
         msg_pair("Hostname", server.hostname)
         msg_pair("Description", server.description) if server.respond_to? :description # When fog supports description
         puts "\n"

@@ -48,6 +48,14 @@ class Chef
         config[key] || Chef::Config[:knife][key]
       end
 
+      def color_state(state)
+        case state.to_s.downcase
+          when 'shutting-down','terminated','stopping','stopped' then ui.color(state, :red)
+          when 'pending', 'locked' then ui.color(@tate, :yellow)
+          else ui.color(state, :green)
+        end
+      end
+
       def validate!
       end
 
