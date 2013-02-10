@@ -17,7 +17,7 @@ class Chef
       def run
         server = connection.servers.get(@name_args.first)
         msg_pair("Server ID", server.serverid)
-        msg_pair("State", ui.color(color_state(state),:bold))
+        msg_pair("State", ui.color(color_state(server.state),:bold))
         msg_pair("Hostname", server.hostname)
         msg_pair("Description", server.description) if server.respond_to? :description # When fog supports description
         puts "\n"
