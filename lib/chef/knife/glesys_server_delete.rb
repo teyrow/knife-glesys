@@ -90,7 +90,7 @@ class Chef
 
           server.destroy
 
-          ui.warn("Deleted server '#{server_id}'")
+          ui.warn("Deleted server #{server_id}")
 
           if config[:purge]
             thing_to_delete = config[:chef_node_name] || server_id
