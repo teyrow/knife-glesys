@@ -28,12 +28,16 @@ class Chef
         msg_pair("Memory", "#{server.memorysize} MB")
         msg_pair("Disk", "#{server.disksize} GB")
         puts "\n"
-        msg_pair("Template", server.templatename)
+        msg_pair("Image", server.templatename)
         msg_pair("Platform", server.platform)
         msg_pair("Datacenter", server.datacenter)
         puts "\n"
-        msg_pair("Transfer", "#{server.transfer['usage']} of #{server.transfer['max']} #{server.transfer['unit']}")
-        msg_pair("Cost", "#{server.cost['amount']} #{server.cost['currency']} per #{server.cost['timeperiod']}")
+        msg(ui.color("Current Usage:",:bold))
+        msg_pair("Transfer", "#{ui.color(server.usage['transfer']['usage'].to_s, :yellow)} of #{server.usage['transfer']['max']} #{server.usage['transfer']['unit']}")
+        msg_pair("Memory", "#{ui.color(server.usage['memory']['usage'].to_s, :yellow)} of #{server.usage['memory']['max']} #{server.usage['memory']['unit']}")
+        msg_pair("CPU", "#{ui.color(server.usage['cpu']['usage'].to_s, :yellow)} of #{server.usage['cpu']['max']} #{server.usage['cpu']['unit']}")
+        msg_pair("Disk", "#{ui.color(server.usage['disk']['usage'].to_s, :yellow)} of #{server.usage['disk']['max']} #{server.usage['disk']['unit']}")
+        msg_pair("Cost", "#{ui.color(server.cost['amount'].to_s, :yellow)} #{server.cost['currency']} per #{server.cost['timeperiod']}")
       end
 
     end
