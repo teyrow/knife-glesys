@@ -18,44 +18,54 @@ class Chef
         Chef::Knife::Bootstrap.load_deps
       end
 
-      option :template,
-        :short => "-t TEMPLATE",
-        :long => "--template TEMPLATE",
-        :description => "The template of the server (Debian 6.0 64-bit, Ubuntu, etc)",
-        :proc => Proc.new { |f| Chef::Config[:knife][:template] = f }
+      option :image,
+        :short => "-i IMAGE",
+        :long => "--image IMAGE",
+        :description => "The image to use on the server (Debian 6.0 64-bit, Ubuntu, etc)",
+        :proc => Proc.new { |f| Chef::Config[:knife][:image] = f },
+        :required => true
 
       option :platform,
         :short => "-p PLATFORM",
         :long => "--platform PLATFORM",
         :description => "The platform to launch the server on (Xen or OpenVZ)",
-        :proc => Proc.new { |f| Chef::Config[:knife][:platform] = f }
+        :proc => Proc.new { |f| Chef::Config[:knife][:platform] = f },
+        :required => true
 
       option :datacenter,
-        :short => "-d DATACENTER",
-        :long => "--datacenter DATACENTER",
-        :description => "The datacenter to launch the server in (Falkenberg, New York, Amsterdam or Stockholm)",
-        :proc => Proc.new { |f| Chef::Config[:knife][:datacenter] = f }
+        :long => "--data-center DATACENTER",
+        :description => "The data center to launch the server in (Falkenberg, New York, Amsterdam or Stockholm)",
+        :proc => Proc.new { |f| Chef::Config[:knife][:datacenter] = f },
+        :required => true
+
+      option :rootpassword,
+        :short => "-P PASSWORD",
+        :long => "--root-password PASSWORD",
+        :description => "Root password to set on the new server",
+        :required => true
+
+      option :hostname,
+        :short => "-h HOSTNAME",
+        :long => "--hostname HOSTNAME",
+        :hostname => "Server hostname",
+        :required => true
 
       option :cpucores,
-        :short => "-c CPUCORES",
         :long => "--cpu-cores CPUCORES",
         :description => "The number cpu cores (1-8)",
         :proc => Proc.new { |f| Chef::Config[:knife][:cpucores] = f }
 
       option :memorysize,
-        :short => "-m MEMORY",
         :long => "--memory-size MEMORY",
         :description => "The amount of memory (128mb - 16384mb)",
         :proc => Proc.new { |f| Chef::Config[:knife][:memorysize] = f }
 
       option :disksize,
-        :short => "-d DISK",
         :long => "--disk-size DISK",
         :description => "The amount of disk (5gb-100gb)",
         :proc => Proc.new { |f| Chef::Config[:knife][:disksize] = f }
 
       option :transfer,
-        :short       => "-T TRANSFER",
         :long        => "--transfer TRANSFER",
         :description => "Transfer (50gb - 10000gb)",
         :proc        => Proc.new { |f| Chef::Config[:knife][:transfer] = f }
@@ -71,19 +81,11 @@ class Chef
         :long => "--description DESCRIPTION",
         :description => "Server description"
 
-      option :hostname,
-        :short => "-h HOSTNAME",
-        :long => "--hostname HOSTNAME",
-        :hostname => "Server hostname",
-        :required => true
-
       option :ipv4,
-        :short => "-i IP",
         :long => "--ipv4 IP",
         :hostname => "IPV4 to assign the server"
 
       option :ipv6,
-        :short => "-I IP",
         :long => "--ipv6 IP",
         :hostname => "IPV6 to assign the server"
 
@@ -100,17 +102,11 @@ class Chef
         :proc => Proc.new { |key| Chef::Config[:knife][:ssh_gateway] = key }
 
       option :ssh_port,
-        :short => "-p PORT",
+        :short => "-o PORT",
         :long => "--ssh-port PORT",
         :default => "22",
         :description => "SSH Port",
         :proc => Proc.new { |key| Chef::Config[:knife][:ssh_port] = key }
-
-      option :rootpassword,
-        :short => "-p PASSWORD",
-        :long => "--root-password PASSWORD",
-        :required => true,
-        :description => "Root password to set on the new server"
 
       option :json_attributes,
         :short => "-j JSON",
@@ -145,9 +141,9 @@ class Chef
 
         # Show information about the new server
         msg_pair("Server ID", @server.serverid)
-        msg_pair("State", ui.color(color_state(state),:bold))
+        msg_pair("State", ui.color(color_state(@server.state),:bold))
         msg_pair("Hostname", @server.hostname)
-        msg_pair("Description", @server.description) if @server.respond_to? :description # When fog supports description
+        msg_pair("Description", @server.description)
         puts "\n"
         msg_pair("IPv4", @server.iplist.select{|i| i["version"] == 4}.collect{|i| i["ipaddress"]}.join(", "))
         msg_pair("IPv6", @server.iplist.select{|i| i["version"] == 6}.collect{|i| i["ipaddress"]}.join(", "))
@@ -156,11 +152,9 @@ class Chef
         msg_pair("Memory", "#{@server.memorysize} MB")
         msg_pair("Disk", "#{@server.disksize} GB")
         puts "\n"
-        msg_pair("Template", @server.templatename)
+        msg_pair("Image", @server.templatename)
         msg_pair("Platform", @server.platform)
         msg_pair("Datacenter", @server.datacenter)
-        puts "\n"
-        msg_pair("Cost", "#{@server.cost['amount']} #{@server.cost['currency']} per #{@server.cost['timeperiod']}")
 
         # Waiting for server to boot
         print "\nBooting"
@@ -171,10 +165,11 @@ class Chef
 
         # Bootstrap the node
         bootstrap_for_node(@server,@server.public_ip_address).run
+
         msg_pair("Server ID", @server.serverid)
-        msg_pair("State", ui.color(color_state(state),:bold))
+        msg_pair("State", ui.color(color_state(@server.state),:bold))
         msg_pair("Hostname", @server.hostname)
-        msg_pair("Description", @server.description) if @server.respond_to? :description # When fog supports description
+        msg_pair("Description", @server.description)
         puts "\n"
         msg_pair("IPv4", @server.iplist.select{|i| i["version"] == 4}.collect{|i| i["ipaddress"]}.join(", "))
         msg_pair("IPv6", @server.iplist.select{|i| i["version"] == 6}.collect{|i| i["ipaddress"]}.join(", "))
@@ -183,18 +178,18 @@ class Chef
         msg_pair("Memory", "#{@server.memorysize} MB")
         msg_pair("Disk", "#{@server.disksize} GB")
         puts "\n"
-        msg_pair("Template", @server.templatename)
+        msg_pair("Image", @server.templatename)
         msg_pair("Platform", @server.platform)
         msg_pair("Datacenter", @server.datacenter)
         puts "\n"
         msg_pair("Environment", config[:environment] || '_default')
         msg_pair("Run List", (config[:run_list] || []).join(', '))
-        msg_pair("JSON Attributes",config[:json_attributes]) unless !config[:json_attributes] || config[:json_attributes].empty?
+        msg_pair("JSON Attributes", config[:json_attributes]) unless !config[:json_attributes] || config[:json_attributes].empty?
       end
 
       def create_server_def
         default_server = {
-          templatename: locate_config_value(:template),
+          templatename: locate_config_value(:image),
           datacenter: locate_config_value(:datacenter),
           platform: locate_config_value(:platform),
           memorysize: locate_config_value(:memorysize),
@@ -238,7 +233,7 @@ class Chef
       end
 
       def wait_for_tunnelled_sshd(hostname)
-        print("\nWaiting for sshd tunnel")
+        print("\nWaiting for sshd tunnel.")
         print(".") until tunnel_test_ssh(ssh_connect_host) {
           sleep @initial_sleep_delay ||= (vpc_mode? ? 40 : 10)
           puts("done")
@@ -246,7 +241,6 @@ class Chef
       end
 
       def tunnel_test_ssh(hostname, &block)
-        puts "tunnel_test_ssh"
         gw_host, gw_user = config[:ssh_gateway].split('@').reverse
         gw_host, gw_port = gw_host.split(':')
         gateway = Net::SSH::Gateway.new(gw_host, gw_user, :port => gw_port || 22)
@@ -263,9 +257,8 @@ class Chef
       end
 
       def wait_for_direct_sshd(hostname, ssh_port)
-        print "\nWaiting for ssh"
+        print "\nWaiting for ssh."
         print(".") until tcp_test_ssh(ssh_connect_host, ssh_port) {
-          sleep 10
           puts "done"
         }
       end
