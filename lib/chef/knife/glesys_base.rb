@@ -49,11 +49,15 @@ class Chef
       end
 
       def color_state(state)
+
+        return ui.color("unknown", :cyan) if state.nil?
+
         case state.to_s.downcase
           when 'shutting-down','terminated','stopping','stopped' then ui.color(state, :red)
-          when 'pending', 'locked' then ui.color(@tate, :yellow)
+          when 'pending', 'locked' then ui.color(state, :yellow)
           else ui.color(state, :green)
         end
+
       end
 
       def validate!
