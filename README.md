@@ -1,47 +1,111 @@
-# knife-glesys
+# Knife Glesys
+
+knife-glesys is a Knife addon that will make it easier manage your VPS at [Glesys](http://www.glesys.se). You can create,
+delete, list and show info about your servers.
+To be able to use this addon you need to create a Glesys API key with permission to `IP` and `SERVER`. You do this in their control panel.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+To use the addon install it as a normal gem, from your command line run:
 
-    $ gem install knife-glesys
+```bash
+$ gem install knife-glesys
+```
+
+## Configuration
+
+To configure the addon you can either add your Glesys username and your API key to knife.rb in your chef directory.
+
+```ruby
+knife[:glesys_username] = "YOUR USERNAME"
+knife[:glesys_api_key]  = "YOUR API KEY"
+```
+
+Or you can pass your username and your API key to the knife glesys command.
+
+```bash
+$ knife glesys server list --glesys-api-key "YOUR API KEY" --glesys-username "YOUR USERNAME"
+```
 
 ## Usage
 
 ### Create a new server
 
-    $ knife glesys server create (options)
+When creating a new instance you there are some options you need to supply for it to work, `template` (server image),
+`platform`, `data-center`, `root-password` and a `hostname`. It is recommended that you also specify the number of
+cpu cores, the amount of memory and disksize. Or else these will default to 1 cpu core, 512 mb memory and 10 gb disk.
+If you want to view the options you can just run the command without any options.
 
-#### Options
+```bash
+$ knife glesys server create (options)
+```
 
-`-t, --template TEMPLATE`        -  One of the available Glesys templates
-`-p, --platform PLATFORM`        -  OpenVZ or Xen
-`-d, --datacenter DATACENTER`    -  Location, (Falkenberg, New York, Amsterdam or Stockholm)
-`-c, --cpucores CPUCORES`        -  Number of cpu cores (1-8)
-`-m, --memory-size MEMORY`       -  The amount of memory (128mb-16384mb)
-`-d, --disk-size DISK`           -  The amount of disk (5gb-100gb)
-`-T, --transfer TRANSFER`        -  The amount of monthly transfer (50gb-10000gb)
-`-N, --node-name NAME`           -  Chef node name
-`-r, --run-list RUN_LIST`        -  Comma sperated list of roles/recipes tp apply
-`-j, --json-attributes JSON`     -  A JSON string to be added to the first run of chef-client
-`-R, --root-password PASSWORD`   -  Password to set on the root user
-`-h, --hostname HOSTNAME`        -  Hostname to assign the server
-`-D, --description DESCRIPTION`  -  Description of the server
-`-i, --ipv4 IPV4`                -  IPv4 address to assign
-`-I, --ipv6 IPV6`                -  IPv6 address to assign
+To create a OpenVZ Debian server in Stockholm you run this command (This will also provision the host with the `db` role):
 
-#### Example
+```bash
+$ knife glesys server create --template "Debian 6.0 64-bit" --platform "OpenVZ" --data-center "Stockholm" \
+  --cpu-cores 1 --memory-size 128 --transfer 50 -N database --run-list 'role[:db]' \
+  --hostname "data.example.com" --root-password 'passw0rd' --description "Redis database server"
+```
 
-To create a Debian server in Stockholm.
+### List available templates
 
-    $ knife glesys server create -t "Debian 6.0 64-bit" -p OpenVZ -d Stockholm -c 1 -m 128 \
-      -t 50 -N database -r 'role[:db]' -h db01.internet.com -R passw0rd -d 'Redis database server 01'
+Glesys offers many different templates (or images) to use when you spin up a new VPS. To get a list of all available and on which platform you run:
 
+```bash
+$ knife glesys templates list
+```
+      
+### List your servers
+
+To list your servers that you have connected to your account. This will give you a list with 
+
+```bash
+$ knife glesys server list
+```
+
+### More information about a server
+
+To get detailed information about a server like how much memory that is used and how much the server costs you can issue the info command.
+
+```bash
+$ knife glesys server info vz31337
+```
+
+### Delete a server
+
+Every server has a uniqe id at Glesys. Just pass this id to the delete command to erase the server.
+
+```bash
+$ knife glesys server delete vz31337
+```
+
+And to at the same time delete the Chef node pass the `--purge` option to the delete command.
+
+## TODO
+
+There are a few things that still needs to be fixed (in no special order).
+
+* Manage Glesys IPs
 
 ## Contributing
+
+I like contributions, so if you find any errors please add a issue or even better, send a pull request.
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## Copyright
+
+(The MIT License)
+
+Copyright (c) 2013 smgt (Simon Gate)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
