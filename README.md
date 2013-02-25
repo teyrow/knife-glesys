@@ -87,6 +87,7 @@ And to at the same time delete the Chef node pass the `--purge` option to the de
 There are a few things that still needs to be fixed (in no special order).
 
 * Manage Glesys IPs
+* Graph server stats in console
 
 ## Contributing
 
