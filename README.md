@@ -89,6 +89,10 @@ There are a few things that still needs to be fixed (in no special order).
 * Manage Glesys IPs
 * Graph server stats in console
 
+## Known issues
+
+* Needs HEAD version of [fog](https://github.com/fog/fog) to work
+
 ## Contributing
 
 I like contributions, so if you find any errors please add a issue or even better, send a pull request.

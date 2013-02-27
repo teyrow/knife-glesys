@@ -10,7 +10,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["simon@smgt.me"]
   gem.description   = %q{Glesys support for Chef's Knife Command}
   gem.summary       = gem.description
-  gem.homepage      = ""
+  gem.homepage      = "https://github.com/smgt/knife-glesys"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
