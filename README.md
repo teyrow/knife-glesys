@@ -31,7 +31,7 @@ $ knife glesys server list --glesys-api-key "YOUR API KEY" --glesys-username "YO
 
 ### Create a new server
 
-When creating a new instance you there are some options you need to supply for it to work, `template` (server image),
+When creating a new instance you there are some options you need to supply for it to work, `image` (server template),
 `platform`, `data-center`, `root-password` and a `hostname`. It is recommended that you also specify the number of
 cpu cores, the amount of memory and disksize. Or else these will default to 1 cpu core, 512 mb memory and 10 gb disk.
 If you want to view the options you can just run the command without any options.
@@ -47,6 +47,34 @@ $ knife glesys server create --image "Debian 6.0 64-bit" --platform "OpenVZ" --d
   --cpu-cores 1 --memory-size 128 --transfer 50 -N database --run-list 'role[:db]' \
   --hostname "data.example.com" --root-password 'passw0rd' --description "Redis database server"
 ```
+
+#### Using configuration file
+
+It may be more convenient to use `knife.rb` for more options. Something like
+
+```ruby
+knife[:glesys_username] = "YOUR USERNAME"
+knife[:glesys_api_key]  = "YOUR API KEY"
+ knife[:image] => 'Ubuntu 12.04 LTS 64-bit',
+ knife[:datacenter] => 'Falkenberg',
+ knife[:platform] => 'OpenVZ',
+ knife[:memorysize] => 128,
+ knife[:cpucores] => 1,
+ knife[:description] => 'Redis database server',
+ knife[:transfer] => 50,
+ knife[:hostname] => 'data.example.com',
+ knife[:disksize] => 10,
+ knife[:rootpassword] => 'passw0rd'
+ knife[:identity_file] => '~/.ssh/id_rsa.pub'
+```
+
+#### Configure password-less ssh
+
+By passing option `--identity-file PUBLIC_KEY_PATH` the server is adding it to `~/.ssh/authorized_keys`.
+
+### Support for knife-solo
+Option `--no-bootstrap` just creates the server and tries to edit `nodes/SERVER_IP.json` if knife-solo exists. 
+Install solo plugin with `gem install knife-solo`
 
 ### List available templates
 
