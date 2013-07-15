@@ -112,6 +112,26 @@ class Chef
         :description => "A JSON string to be added to the first run of chef-client",
         :proc => lambda { |o| JSON.parse(o) }
 
+      option :identity_file,
+        :short => "-i IDENTITY_FILE",
+        :long => "--identity-file IDENTITY_FILE",
+        :description => "The SSH identity file used for authentication"
+
+      option :bootstrap,
+        :short => "-B",
+        :long => "--[no-]bootstrap",
+        :type => :boolean,
+        :default => true,
+        :description => "Do not bootstrap the server"
+
+      option :force_owerwrite,
+        :short => "-f",
+        :long => "--[no-]force",
+        :type => :bolean,
+        :default => false,
+        :description => "Bootstrap server with this HOSTNAME, even if it already exists"
+
+
       def tcp_test_ssh(hostname, ssh_port)
         tcp_socket = TCPSocket.new(hostname, ssh_port)
         readable = IO.select([tcp_socket], nil, nil, 5)
@@ -134,11 +154,27 @@ class Chef
       def run
         validate!
 
-        default_server = create_server_def
-        @server = connection.servers.create default_server
 
-        # Show information about the new server
+        default_server = create_server_def
+        
+        # looking up if hostname already in use: 
+        @server = connection.servers.find{|s| s.hostname == default_server[:hostname]}
+        if @server 
+          @server = connection.servers.get(@server.serverid) #full load
+          @server.rootpassword = default_server[:rootpassword]
+          already_created = true
+        else
+          @server = connection.servers.create default_server
+          already_created = false
+        end
+
+        # Show information about the server
         print_server_info
+
+        if already_created 
+          ui.warn("Server with hostname '#{@server.hostname}' already exits!")
+          ui.confirm("Do you wan't to bootstrap this existing server") unless config[:force_owerwrite]
+        end
 
         # Waiting for server to boot
         print "\nBooting"
@@ -147,14 +183,32 @@ class Chef
         # Waiting for sshd to start
         wait_for_sshd(@server.public_ip_address)
 
-        # Bootstrap the node
-        bootstrap_for_node(@server,@server.public_ip_address).run
+        # Going passwordless
+        unless already_created
+          Fog.credentials[:public_key_path] = config[:identity_file] || Fog.credentials[:public_key_path]
+          @server.setup({:password => config[:rootpassword]})
+        end
 
-        print_server_info
 
-        msg_pair("Environment", config[:environment] || '_default')
-        msg_pair("Run List", (config[:run_list] || []).join(', '))
-        msg_pair("JSON Attributes", config[:json_attributes]) unless !config[:json_attributes] || config[:json_attributes].empty?
+        bootstrap = bootstrap_for_node(@server,@server.public_ip_address)
+
+        if config[:bootstrap] # Bootstrap the node
+          bootstrap.run
+          msg_pair("Environment", config[:environment] || '_default')
+          msg_pair("Run List", (config[:run_list] || []).join(', '))
+          msg_pair("JSON Attributes", config[:json_attributes]) unless !config[:json_attributes] || config[:json_attributes].empty?
+          print_server_info
+        elsif defined?(SoloPrepare)
+          # only generate config (solo version)
+          solo = SoloPrepare.new
+          solo.name_args = bootstrap.name_args
+          solo.config = bootstrap.config
+          solo.ui = bootstrap.ui
+          solo.generate_node_config
+          msg(ui.color("\nEdit node config and run:",:bold))
+          msg("`knife solo bootstrap root@#{@server.public_ip_address}`\n\n")
+        end
+  
       end
 
       def create_server_def
@@ -177,6 +231,7 @@ class Chef
       def bootstrap_for_node(server,ssh_host)
         bootstrap = Chef::Knife::Bootstrap.new
         bootstrap.name_args = [ssh_host]
+        bootstrap.ui = ui
         bootstrap.config[:run_list] = locate_config_value(:run_list) || []
         bootstrap.config[:ssh_user] = "root"
         bootstrap.config[:ssh_port] = config[:ssh_port]
@@ -184,7 +239,7 @@ class Chef
         bootstrap.config[:ssh_gateway] = config[:ssh_gateway]
         bootstrap.config[:use_sudo] = false
         # bootstrap.config[:identity_file] = config[:identity_file]
-        bootstrap.config[:chef_node_name] = locate_config_value(:chef_node_name) || server.serverid
+        bootstrap.config[:chef_node_name] = locate_config_value(:ssh_host)
         bootstrap.config[:prerelease] = config[:prerelease]
         bootstrap.config[:bootstrap_version] = locate_config_value(:bootstrap_version)
         bootstrap.config[:first_boot_attributes] = locate_config_value(:json_attributes) || {}
