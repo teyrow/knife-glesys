@@ -21,32 +21,32 @@ class Chef
         :long => "--image IMAGE",
         :description => "The image to use on the server (Debian 6.0 64-bit, Ubuntu, etc)",
         :proc => Proc.new { |f| Chef::Config[:knife][:image] = f },
-        :required => true
+        :required => false
 
       option :platform,
         :short => "-p PLATFORM",
         :long => "--platform PLATFORM",
         :description => "The platform to launch the server on (Xen or OpenVZ)",
         :proc => Proc.new { |f| Chef::Config[:knife][:platform] = f },
-        :required => true
+        :required => false
 
       option :datacenter,
         :long => "--data-center DATACENTER",
         :description => "The data center to launch the server in (Falkenberg, New York, Amsterdam or Stockholm)",
         :proc => Proc.new { |f| Chef::Config[:knife][:datacenter] = f },
-        :required => true
+        :required => false
 
       option :rootpassword,
         :short => "-P PASSWORD",
         :long => "--root-password PASSWORD",
         :description => "Root password to set on the new server",
-        :required => true
+        :required => false
 
       option :hostname,
         :short => "-h HOSTNAME",
         :long => "--hostname HOSTNAME",
         :hostname => "Server hostname",
-        :required => true
+        :required => false
 
       option :cpucores,
         :long => "--cpu-cores CPUCORES",
