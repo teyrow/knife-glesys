@@ -55,17 +55,17 @@ It may be more convenient to use `knife.rb` for more options. Something like
 ```ruby
 knife[:glesys_username] = "YOUR USERNAME"
 knife[:glesys_api_key]  = "YOUR API KEY"
- knife[:image] => 'Ubuntu 12.04 LTS 64-bit',
- knife[:datacenter] => 'Falkenberg',
- knife[:platform] => 'OpenVZ',
- knife[:memorysize] => 128,
- knife[:cpucores] => 1,
- knife[:description] => 'Redis database server',
- knife[:transfer] => 50,
- knife[:hostname] => 'data.example.com',
- knife[:disksize] => 10,
- knife[:rootpassword] => 'passw0rd'
- knife[:identity_file] => '~/.ssh/id_rsa.pub'
+knife[:image]           = "Ubuntu 12.04 LTS 64-bit"
+knife[:datacenter]      = "Falkenberg"
+knife[:platform]        = "OpenVZ"
+knife[:memorysize]      = 128
+knife[:cpucores]        = 1
+knife[:description]     = "Redis database server"
+knife[:transfer]        = 50
+knife[:hostname]        = "data.example.com"
+knife[:disksize]        = 10
+knife[:rootpassword]    = "passw0rd"
+knife[:identity_file]   = "~/.ssh/id_rsa.pub"
 ```
 
 #### Configure password-less ssh
